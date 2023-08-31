@@ -1,6 +1,8 @@
 # Libraries ---------------------------------------------------------------
 require(pacman)
 p_load(rvest, xml2, tidyverse)
+script_dir<-this.path::here()
+setwd(script_dir)
 
 # Scraping ---------------------------------------------------------------
 
@@ -45,7 +47,7 @@ for (chunk in data_chunks_links) {
 geih_complete_df <- bind_rows(chunks_data_frames) %>%
   select(-c("...1"))
 
-write_csv(geih_complete_df, "../stores/geih_scraped.csv")
+write_csv(geih_complete_df, "../../stores/geih_scraped.csv")
 
 
 
