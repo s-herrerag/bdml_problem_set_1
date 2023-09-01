@@ -102,3 +102,5 @@ tabla_interes_10 <- problem_set_html_10%>%
   as.data.frame()
 
 tabla_final<-bind_rows(tabla_interes, tabla_interes_2, tabla_interes_3, tabla_interes_4, tabla_interes_5, tabla_interes_6, tabla_interes_7, tabla_interes_8, tabla_interes_9, tabla_interes_10)
+
+write_csv(tabla_final, file = "datosTaller1.csv") 
