@@ -106,19 +106,3 @@ tabla_interes_10 <- problem_set_html_10%>%
 tabla_final<-bind_rows(tabla_interes, tabla_interes_2, tabla_interes_3, tabla_interes_4, tabla_interes_5, tabla_interes_6, tabla_interes_7, tabla_interes_8, tabla_interes_9, tabla_interes_10)
 
 write_csv(tabla_final, file = "datosTaller1.csv")
-
-##Limpieza de datos
-
-tabla_final_limpia<-tabla_final%>%
-  filter(age>=18, p6240==1)%>%
-  drop_na(p6500)
-
-p_load(stargazer)
-
-estadisticas_descriptivas<-stargazer(tabla_final_limpia, 
-          type = 'text', min.max=TRUE, mean.sd = TRUE, 
-          nobs = TRUE, median = TRUE, iqr = FALSE,
-          digits=1, align=T,
-          title = "Summary Statistics")
-
-stat.desc(tabla_final_limpia)
