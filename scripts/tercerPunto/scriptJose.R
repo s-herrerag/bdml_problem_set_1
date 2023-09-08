@@ -14,7 +14,7 @@ stargazer(salario.edad.lm, type="text")
 
 ggplot(tabla_final_limpia, aes(y = logInc, x = age)) +
   geom_point() +
-  stat_smooth(formula = log(y) ~ x + (x^2), method = "lm", se = FALSE, 
+  stat_smooth(formula = 'y ~ x + I(x^2)', method = "lm", se = FALSE, 
               size = 1) +
   theme_bw() +
   labs(x = "Age",  
