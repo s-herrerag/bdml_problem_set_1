@@ -1,5 +1,8 @@
 ## Limpieza de datos
 
+##Santiago: Graficar boxplots de distribución de ingreso por edad, para ver outliers.
+##Santiago: ¿Quitar outliers o high leverage?
+
 library(pacman)
 p_load(rvest, tidyverse)
 
@@ -15,8 +18,10 @@ write_csv(tabla_final_limpia, file = "datosTaller1_limpios.csv")
 
 p_load(stargazer)
 
+
+#Incluir NaN
 estadisticas_descriptivas <- stargazer(tabla_final_limpia,
-  type = "latex", min.max = TRUE, mean.sd = TRUE,
+  type = "text", min.max = TRUE, mean.sd = TRUE,
   nobs = TRUE, median = TRUE, iqr = FALSE,
   digits = 1, align = T,
   title = "Summary Statistics"
