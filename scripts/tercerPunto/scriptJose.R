@@ -4,7 +4,7 @@ library(pacman)
 p_load(rvest, tidyverse, stargazer, ggplot2)
 
 tabla_final_limpia <- read.csv("C:\\Users\\PC\\Documents\\datosTaller1_limpios.csv") %>%
-  mutate(logInc = log(p6500), age2 = age^2) ##Arreglar variable salario
+  mutate(logInc = log(y_ingLab_m_ha), age2 = age^2) ##Arreglar variable salario
 
 tabla_final_limpia <- tabla_final_limpia %>%
   mutate(age2 = age^2)
