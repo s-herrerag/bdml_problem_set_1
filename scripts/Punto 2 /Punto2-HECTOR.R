@@ -93,6 +93,6 @@ write_csv(df, file = "BaseImputada.csv")
 primer_cuartil <- quantile(salario_horas, 0.25)
 segundo_cuartil <- quantile(salario_horas, 0.50)
 tercer_cuartil <- quantile(salario_horas, 0.75)
-cuarto_cuartil <- quantile(salario_horas, 0.999)
+cuarto_cuartil <- quantile(salario_horas, 0.99)
 
 
