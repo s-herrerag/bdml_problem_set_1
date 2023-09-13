@@ -23,3 +23,8 @@ estadisticas_descriptivas <- stargazer(tabla_final_limpia,
   digits = 1, align = T,
   title = "Summary Statistics"
 )
+
+salario_horas <- tabla_final_limpia$y_ingLab_m_ha
+
+atipico <- which.max(tabla_final_limpia$y_ingLab_m_ha)
+tabla_final_limpia$y_ingLab_m_ha[atipico] <- NA
