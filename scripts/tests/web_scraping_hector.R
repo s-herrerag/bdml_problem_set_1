@@ -16,7 +16,7 @@ for (url in tablas_url){
   temp<-read_html(url) %>% html_table() 
   temp<-as.data.frame(temp[[1]])
   df<-rbind(df, temp)
+  df <- df[, -1]
 }
 
 write_csv(df, file = "datos.csv") 
-
