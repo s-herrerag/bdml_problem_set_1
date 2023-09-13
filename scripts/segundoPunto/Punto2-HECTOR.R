@@ -10,7 +10,6 @@ setwd("/Users/hectorsegura/Documentos/Big Data & ML/Taller 1 ")
 #Trayendo la base de datos tras el scrape 
 df <- read.csv("datos.csv")
 df <- df[, -1]
-head(df)
 summary(df$age)
 #Manteniendo los mayores de 18 
 df <- subset(df, age >= 18 & p6240 ==1) 
@@ -21,15 +20,14 @@ summary(df$y_ingLab_m_ha) #No hay personas con esta variable de w por horas en 0
 cat("Número de personas sin salario:", salarioNA) #5124 NAs 
 atipico <- which.max(df$y_ingLab_m_ha)
 df$y_ingLab_m_ha[atipico] <- NA
+#La persona con el valor extremo atipico tiene 42 años y es mujer
 
 salario_horas <- df$y_ingLab_m_ha
-salario_horas_NA <- na.omit(salario_horas) 
+salario_horas_noNA <- na.omit(salario_horas) 
 
-desviacion_estandar_S <- sd(salario_horas_NA)
-moda <- mfv(salario_horas_NA)
-media <- mean(salario_horas_NA)
-
-std_nueva <- sd(salario_horas)
+desviacion_estandar_S <- sd(salario_horas_noNA)
+moda <- mfv(salario_horas_noNA)
+media <- mean(salario_horas_noNA)
 
 prueba_ocu <- df$ocu - df$p6240
 summary(prueba_ocu) #Todos los que tienen p6240 son ocupados, no hay cosas raras. En cambio, hay personas que son ocupadas
@@ -75,13 +73,12 @@ salario_horas_ordenado <- sort(salario_horas)
 tail(salario_horas_ordenado) #Sólo hay un valor que se sale mucho de la distribución y es 350583.3 
 
 #Tal vez lo mejor sería quitar este valor atípico para visualizar mejor los datos y estimar con mayor precisión
-#salario_horas <- head(salario_horas_ordenado, -1)
-atipico <- which.max(salario_horas)
-salario_horas[atipico] <- NA
 
 #Imputación de NAs con la moda 
-df$y_ingLab_m_ha <- ifelse(is.na(df$y_ingLab_m_ha), moda, df$y_ingLab_m_ha)
+df$y_ingLab_m_ha <- ifelse(is.na(df$y_ingLab_m_ha), media, df$y_ingLab_m_ha)
 #conteo de cuantas obs estan por encima!!!!!
+std_nueva <- sd(df$y_ingLab_m_ha) #Nueva varianza 
+write_csv(df, file = "BaseImputada.csv") 
 
 #Seccion 
 #1. Decisiones que hemos tomado (variable de w, ocupados, poner como NA el valor extremo)
