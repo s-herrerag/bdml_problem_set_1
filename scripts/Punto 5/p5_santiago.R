@@ -95,7 +95,7 @@ rmse_df <- data.frame(list_rmse)
 
 
 
-# LOOCV -------------------------------------------------------------------
+# d) LOOCV -------------------------------------------------------------------
 loocv_preds_model1 <- vector("numeric", length = nrow(geih_clean))
 loocv_preds_model2 <- vector("numeric", length = nrow(geih_clean))
 
