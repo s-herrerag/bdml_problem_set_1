@@ -12,15 +12,32 @@ df <- read.csv("datos.csv")
 df <- df[, -1]
 summary(df$age)
 #Manteniendo los mayores de 18 
-df <- subset(df, age >= 18 & p6240 ==1) 
+df <- subset(df, age >= 18 & p6240 ==1) #Muestra de 14.091 obs 
 summary(df$age)
 #Cuál es la mejor manera de manejar los datos 
 salarioNA <- sum(is.na(df$y_ingLab_m_ha))
 summary(df$y_ingLab_m_ha) #No hay personas con esta variable de w por horas en 0 
 cat("Número de personas sin salario:", salarioNA) #5124 NAs 
 atipico <- which.max(df$y_ingLab_m_ha)
-df$y_ingLab_m_ha[atipico] <- NA
-#La persona con el valor extremo atipico tiene 42 años y es mujer
+df$y_ingLab_m_ha[atipico] <- NA #La persona con el valor extremo atipico tiene 42 años y es mujer
+
+#Eliminaremos los valores atípicos de la distribución. Nos quedamos con el percentil 98 de la muestra
+#Vamos a restringuir la base únicamente para las personas que tienen información del salario
+primer_cuartil  <-  quantile(df$y_ingLab_m_ha, 0.25, na.rm = TRUE) 
+segundo_cuartil <-  quantile(df$y_ingLab_m_ha, 0.50, na.rm = TRUE) 
+tercer_cuartil  <-  quantile(df$y_ingLab_m_ha, 0.75, na.rm = TRUE) 
+p95 <- quantile(df$y_ingLab_m_ha, 0.95, na.rm = TRUE) 
+p98 <- quantile(df$y_ingLab_m_ha, 0.98, na.rm = TRUE) 
+p99 <- quantile(df$y_ingLab_m_ha, 0.99, na.rm = TRUE) 
+
+df <- df %>%
+  filter(df$y_ingLab_m_ha <p99) #por encima o igual a de esto son 91 obs.Total obs = 8875
+
+#df <- df %>%
+  #filter(!is.na(df$y_ingLab_m_ha)) #son 8966 con las que me quedo
+
+std_nueva <- sd(df$y_ingLab_m_ha) #Nueva varianza 8111 
+write_csv(df, file = "BaseFinal.csv") 
 
 salario_horas <- df$y_ingLab_m_ha
 salario_horas_noNA <- na.omit(salario_horas) 
@@ -35,7 +52,21 @@ summary(prueba_ocu) #Todos los que tienen p6240 son ocupados, no hay cosas raras
 
 salario_horas <- df$y_ingLab_m_ha
 
-hist(salario_horas, 
+df <- df %>% 
+  mutate(logw = log(y_ingLab_m_ha))
+
+nueva <- df %>% 
+  filter(salario_horas<cuarto_cuartil) 
+
+nueva <- nueva %>% 
+  mutate(logw = log(y_ingLab_m_ha))
+
+desviacion_estandar_filter <- sd(nueva$y_ingLab_m_ha)
+moda <- mfv(nueva$y_ingLab_m_ha)
+media <- mean(salario_horas_noNA)
+  
+#Usar log de w para construir los graficos
+hist(df$logw, 
      main = "Histograma Salario por horas",  # Título del gráfico
      xlab = "Valores",                       # Etiqueta del eje x
      ylab = "Frecuencia",                    # Etiqueta del eje y
@@ -50,15 +81,15 @@ boxplot(salario_horas) #Hacer uno por rangos de edad o algo similar
 hist(df$age) #El max son 91 años 
 
 rangos_edad <- NA
-rangos_edad <- ifelse(df$age >=18 & df$age <=30, 1, NA)
-rangos_edad <- ifelse(df$age > 30 & df$age <=50, 2, rangos_edad)
-rangos_edad <- ifelse(df$age > 50 & df$age <=70, 3, rangos_edad)
-rangos_edad <- ifelse(df$age > 70 & df$age <=91, 4, rangos_edad)
+rangos_edad <- ifelse(nueva$age >=18 & nueva$age <=30, 1, NA)
+rangos_edad <- ifelse(nueva$age > 30 & nueva$age <=50, 2, rangos_edad)
+rangos_edad <- ifelse(nueva$age > 50 & nueva$age <=70, 3, rangos_edad)
+rangos_edad <- ifelse(nueva$age > 70 & nueva$age <=91, 4, rangos_edad)
 label_edad <- c("18-30", "31-50", "51-70", "71-91")
 rangos_edad <- factor(rangos_edad, levels = 1:4, labels = label_edad)
 
 par(cex.axis = 0.8) 
-boxplot(salario_horas ~ rangos_edad,
+boxplot(nueva$logw ~ rangos_edad,
         main = "Salario según rangos de edad", 
         xlab = "Rangos de edad",
         ylab = "Salario por horas",
@@ -92,7 +123,15 @@ write_csv(df, file = "BaseImputada.csv")
 
 primer_cuartil <- quantile(salario_horas, 0.25)
 segundo_cuartil <- quantile(salario_horas, 0.50)
-tercer_cuartil <- quantile(salario_horas, 0.75)
-cuarto_cuartil <- quantile(salario_horas, 0.99)
+tercer_cuartil <- quantile(salario_horas, 0.95)
+cuarto_cuartil <- quantile(salario_horas, 0.99, na.rm = TRUE)
 
 
+
+df %>%
+  filter(salario_horas<cuarto_cuartil) %>% 
+  ggplot()+geom_histogram(aes(x= salario_horas))
+
+
+quienes <- df %>%
+  filter(salario_horas>=cuarto_cuartil)
