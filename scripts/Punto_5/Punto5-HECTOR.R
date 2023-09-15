@@ -29,4 +29,24 @@ test   <- df[!muestra, ] #df donde el index muestra es FALSE
 
 stargazer(data.frame(df), header=FALSE, type='text',title="Variables Included in the Selected Data Set")
 
+model_age<-lm(logW~age + age2,data=train)
+summary(model_age)
+test$model_age<-predict(model_age,newdata = test)
+with(test,mean((logW-model_age)^2))
+
+model_female<-lm(logW~female,data=train)
+summary(model_female)
+test$model_female<-predict(model_female,newdata = test)
+with(test,mean((logW-model_female)^2))
+
+
+#departamento 
+#clase 
+#oficio
+#formal 
+#maxEducLevel
+#hours_worked
+
+
+
 
