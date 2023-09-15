@@ -109,7 +109,7 @@ for (i in seq_len(nrow(geih_clean))) {
 
 pred_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
 
-loocv_rmse <- rmse(temp, truth = ...1, estimate = ...2)
+loocv_rmse <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
 
 loocv_rmse
 
