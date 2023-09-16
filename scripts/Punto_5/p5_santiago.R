@@ -8,8 +8,7 @@ p_load(this.path, tidyverse, tidymodels)
 file_dir <- this.path::here()
 setwd(file_dir)
 
-
-geih_clean <- read.csv("../../stores/geih_scraped.csv")
+geih_clean <- read.csv("../Punto_2/BaseFinal.csv")
 
 #We also need to verify the factor data
 geih_clean <- geih_clean %>%
@@ -53,10 +52,19 @@ rec_ext6 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + ofi
 rec_ext7 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ sex:maxEducLevel:clase+ sex:oficio:clase) %>%
   step_dummy(all_factor_predictors())
+rec_ext8 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel) %>%
+  step_dummy(all_factor_predictors())
+rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% #sex no funciona muy bien 
+  step_dummy(all_factor_predictors())
+rec_ext10 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel + formal:clase) %>% #sex no funciona muy bien 
+  step_dummy(all_factor_predictors())
 
 #Estimate fits
 list_recipes <- list(rec_age, rec_gender, rec_ext1, rec_ext2, rec_ext3, 
-                     rec_ext4, rec_ext5, rec_ext6, rec_ext7)
+                     rec_ext4, rec_ext5, rec_ext6, rec_ext7, rec_ext8, rec_ext9, rec_ext10)
 
 #Lapply with workflows
 fit_tidy_model <- function(x, df=train) {
@@ -77,7 +85,8 @@ list_workflows <- lapply(list_recipes, function(x){fit_tidy_model(x, train)})
 #Lapply with predictions
 predict_from_workflow <- function(w, df_test=test) {
   predictions <- predict(w, new_data = df_test) %>% 
-    bind_cols(df_test)
+    bind_cols(df_test) %>% 
+    mutate(Error = exp(logw) - exp(.pred)) #Error en pesos 
   
   predictions
 }
@@ -91,9 +100,20 @@ list_predictions <- lapply(list_workflows, function (w){predict_from_workflow(w,
 list_rmse <- lapply(list_predictions, function (pred){rmse_from_predict(pred)})
 
 ###Report RMSE in a table
-rmse_df <- data.frame(list_rmse)
+rmse_df <- data.frame(list_rmse) 
 
+Hist_error <- ggplot(list_predictions[[11]]) + 
+  geom_histogram(aes(x=Error), color = "black", fill = "grey") +  
+  scale_y_continuous(breaks = seq(0, 1500, by = 150)) + 
+  scale_x_continuous(breaks = seq(-10000, 50000, by = 10000), limits = c(NA, 50000)) + 
+  ylab("Frecuencia") + 
+  xlab("Error de predicción \n (Diferencia entre salario real y predicho en pesos)") + 
+  theme_classic()
 
+ggsave(Hist_error, "/ruta/Nombre.png", dpi = 500) #Carpeta gráficos   
+
+summary(list_predictions[[11]]$Error)
+std <- sd(list_predictions[[11]]$Error)
 
 # d) LOOCV -------------------------------------------------------------------
 loocv_preds_model1 <- vector("numeric", length = nrow(geih_clean))
