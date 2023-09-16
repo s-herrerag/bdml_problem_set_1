@@ -56,11 +56,11 @@ rec_ext8 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + ofi
   step_interact(terms = ~ totalHoursWorked:maxEducLevel) %>%
   step_dummy(all_factor_predictors())
 rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% #sex no funciona muy bien 
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% 
   step_dummy(all_factor_predictors())
 rec_ext10 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel + formal:clase) %>% #sex no funciona muy bien 
-  step_dummy(all_factor_predictors())
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel + formal:clase) %>% 
+  step_dummy(all_factor_predictors()) #Los dos últimos dan el mismo RMSE. 
 
 #Estimate fits
 list_recipes <- list(rec_age, rec_gender, rec_ext1, rec_ext2, rec_ext3, 
@@ -116,6 +116,7 @@ summary(list_predictions[[11]]$Error)
 std <- sd(list_predictions[[11]]$Error)
 
 # d) LOOCV -------------------------------------------------------------------
+
 loocv_preds_model1 <- vector("numeric", length = nrow(geih_clean))
 loocv_preds_model2 <- vector("numeric", length = nrow(geih_clean))
 
