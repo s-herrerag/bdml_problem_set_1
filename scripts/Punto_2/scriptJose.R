@@ -1,30 +1,44 @@
 ## Limpieza de datos
 
-##Santiago: Graficar boxplots de distribución de ingreso por edad, para ver outliers.
-##Santiago: ¿Quitar outliers o high leverage?
+
+# Carga de paquetes y datos necesarios. -----------------------------------
 
 library(pacman)
-p_load(rvest, tidyverse)
+p_load(this.path, rvest, tidyverse, stargazer)
+file_dir <- this.path::here()
+setwd(file_dir)
 
-tabla_final <- read.csv("C:\\Users\\PC\\Documents\\datosTaller1.csv")
-
-tabla_final_limpia <- tabla_final %>%
-  filter(age >= 18, p6240 == 1) ##¿Qué variable tomamos para ingreso? ¿Cuál nos da un ingreso de alguien "empleado"? ¿Empleado por quién?
-
-write_csv(tabla_final_limpia, file = "datosTaller1_limpios.csv")
-
-p_load(stargazer)
+df <- read.csv("../../stores/geih_scraped.csv")
 
 
-#Incluir NaN
-estadisticas_descriptivas <- stargazer(tabla_final_limpia,
+# Creación del objeto del percentil 99 ------------------------------------
+
+p99 <- quantile(df$y_ingLab_m_ha, 0.99, na.rm = TRUE)
+
+
+# Limpieza de datos por edad, condición de empleados y eliminación datos atípicos--------
+
+df <- df %>%
+  filter(age >= 18, p6240 == 1) %>%
+  filter(y_ingLab_m_ha < p99)
+
+
+# Exportamos base de datos final. -----------------------------------------
+
+write_csv(df, file = "datosTaller1_limpios.csv")
+
+
+# Otros: ------------------------------------------------------------------
+
+# Tabla resumen de NaN's
+
+nanTable <- as.data.frame(colSums(is.na(df)))
+
+# Estadísticas descriptivas base de datos.
+
+estadisticas_descriptivas <- stargazer(df,
   type = "text", min.max = TRUE, mean.sd = TRUE,
   nobs = TRUE, median = TRUE, iqr = FALSE,
   digits = 1, align = T,
   title = "Summary Statistics"
 )
-
-salario_horas <- tabla_final_limpia$y_ingLab_m_ha
-
-atipico <- which.max(tabla_final_limpia$y_ingLab_m_ha)
-tabla_final_limpia$y_ingLab_m_ha[atipico] <- NA
