@@ -38,21 +38,21 @@ rec_age <- recipe(logw ~ age + age2, data = train)
 rec_gender <- recipe(logw ~ sex, data = train)
 
 rec_ext1 <- recipe(logw ~ age + age2 + sex, data=train)
-rec_ext2 <- recipe(logw ~ age + age2 + sex + clase, data=train) %>%
+rec_ext2 <- recipe(logw ~ age + age2 + sex + formal, data=train) %>%
   step_dummy(all_factor_predictors())
-rec_ext3 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel, data=train) %>%
+rec_ext3 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel, data=train) %>%
   step_dummy(all_factor_predictors())
-rec_ext4 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked, data=train) %>%
+rec_ext4 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked, data=train) %>%
   step_dummy(all_factor_predictors())
-rec_ext5 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+rec_ext5 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_dummy(all_factor_predictors())
-rec_ext6 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+rec_ext6 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ sex:maxEducLevel + sex:oficio ) %>%
   step_dummy(all_factor_predictors())
-rec_ext7 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ sex:maxEducLevel:clase+ sex:oficio:clase) %>%
+rec_ext7 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+  step_interact(terms = ~ sex:maxEducLevel + sex:oficio) %>%
   step_dummy(all_factor_predictors())
-rec_ext8 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+rec_ext8 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ totalHoursWorked:maxEducLevel) %>%
   step_dummy(all_factor_predictors())
 rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
@@ -114,7 +114,7 @@ std <- sd(list_predictions[[11]]$Error)
 
 error <- list_predictions[[11]]$Error
 quienes <- list_predictions[[11]] %>% 
-  filter(error <10000)
+  filter(error > 0)
 
 # d) LOOCV -------------------------------------------------------------------
 
