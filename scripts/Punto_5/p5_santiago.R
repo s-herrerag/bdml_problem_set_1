@@ -58,13 +58,10 @@ rec_ext8 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + ofi
 rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% 
   step_dummy(all_factor_predictors())
-rec_ext10 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel + formal:clase) %>% 
-  step_dummy(all_factor_predictors()) #Los dos últimos dan el mismo RMSE. 
 
 #Estimate fits
 list_recipes <- list(rec_age, rec_gender, rec_ext1, rec_ext2, rec_ext3, 
-                     rec_ext4, rec_ext5, rec_ext6, rec_ext7, rec_ext8, rec_ext9, rec_ext10)
+                     rec_ext4, rec_ext5, rec_ext6, rec_ext7, rec_ext8, rec_ext9)
 
 #Lapply with workflows
 fit_tidy_model <- function(x, df=train) {
@@ -115,6 +112,10 @@ ggsave("HistError.png", plot = Hist_error, path = "../../graphics", dpi = 500)
 summary(list_predictions[[11]]$Error)
 std <- sd(list_predictions[[11]]$Error)
 
+error <- list_predictions[[11]]$Error
+quienes <- list_predictions[[11]] %>% 
+  filter(error <10000)
+
 # d) LOOCV -------------------------------------------------------------------
 
 loocv_preds_model1 <- vector("numeric", length = nrow(geih_clean))
@@ -122,27 +123,17 @@ loocv_preds_model2 <- vector("numeric", length = nrow(geih_clean))
 
 for (i in seq_len(nrow(geih_clean))) {
   loo_data <- geih_clean[-i, ]
-  
-  #Model 1
-  loo_fit1 <- list_workflows[[11]] %>% fit(data = loo_data)
-  pred1 <- predict(loo_fit1, new_data = slice(geih_clean, i))$.pred
-  loocv_preds_model1[i] <- pred1
-  
-  #Model 2
-  loo_fit2 <- list_workflows[[12]] %>% fit(data = loo_data)
-  pred2 <- predict(loo_fit2, new_data = slice(geih_clean, i))$.pred
-  loocv_preds_model2[i] <- pred2
-  
+  loo_fit <- list_workflows[[2]] %>% fit(data = loo_data)
+  pred <- predict(loo_fit, new_data = slice(geih_clean, i))$.pred
+  loocv_preds_model1[i] <- pred
   print(paste0("Iteration: ",i))
 }
 
-pred1_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
-pred2_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model2)
+pred_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
 
-loocv_rmse1 <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
-loocv_rmse2 <- rmse(loocv_preds_model2, truth = ...1, estimate = ...2)
+loocv_rmse <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
 
-
+loocv_rmse
 
 
 
