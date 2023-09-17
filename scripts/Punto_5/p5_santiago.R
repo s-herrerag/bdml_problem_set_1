@@ -107,10 +107,10 @@ Hist_error <- ggplot(list_predictions[[11]]) +
   scale_y_continuous(breaks = seq(0, 1500, by = 150)) + 
   scale_x_continuous(breaks = seq(-10000, 50000, by = 10000), limits = c(NA, 50000)) + 
   ylab("Frecuencia") + 
-  xlab("Error de predicción \n (Diferencia entre salario real y predicho en pesos)") + 
+  xlab("Error de predicción \n (Diferencia entre salario observado y predicho en pesos)") + 
   theme_classic()
 
-ggsave(Hist_error, "/ruta/Nombre.png", dpi = 500) #Carpeta gráficos   
+ggsave("HistError.png", plot = Hist_error, path = "../../graphics", dpi = 500)  
 
 summary(list_predictions[[11]]$Error)
 std <- sd(list_predictions[[11]]$Error)
