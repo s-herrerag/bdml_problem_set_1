@@ -25,6 +25,19 @@ stargazer(salario.edad.lm, type = "latex",
           out="outputs/reg_salario_edad.tex")
 
 
+# Interpretación coeficientes, efectos marginales -------------------------
+
+#20 años
+summary(salario.edad.lm)$coefficients[2,1] + (2*summary(salario.edad.lm)$coefficients[3,1]*20)
+
+#40 años
+
+summary(salario.edad.lm)$coefficients[2,1] + (2*summary(salario.edad.lm)$coefficients[3,1]*40)
+
+#60 años
+
+summary(salario.edad.lm)$coefficients[2,1] + (2*summary(salario.edad.lm)$coefficients[3,1]*60)
+
 # Gráfico de dispersión de datos con la curva que describe el modelo --------
 
 age_logInc_plot <- ggplot(df_clean, aes(y = logInc, x = age)) +

@@ -11,6 +11,10 @@ setwd(file_dir)
 df <- read.csv("../../stores/geih_scraped.csv")
 
 
+# Gráfico de dispersión inicial, variable de interés. ---------------------
+
+plot(df$y_ingLab_m_ha)
+
 # Creación del objeto del percentil 99 ------------------------------------
 
 p99 <- quantile(df$y_ingLab_m_ha, 0.99, na.rm = TRUE)
