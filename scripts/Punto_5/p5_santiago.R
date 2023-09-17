@@ -122,17 +122,27 @@ loocv_preds_model2 <- vector("numeric", length = nrow(geih_clean))
 
 for (i in seq_len(nrow(geih_clean))) {
   loo_data <- geih_clean[-i, ]
-  loo_fit <- list_workflows[[2]] %>% fit(data = loo_data)
-  pred <- predict(loo_fit, new_data = slice(geih_clean, i))$.pred
-  loocv_preds_model1[i] <- pred
+  
+  #Model 1
+  loo_fit1 <- list_workflows[[11]] %>% fit(data = loo_data)
+  pred1 <- predict(loo_fit1, new_data = slice(geih_clean, i))$.pred
+  loocv_preds_model1[i] <- pred1
+  
+  #Model 2
+  loo_fit2 <- list_workflows[[12]] %>% fit(data = loo_data)
+  pred2 <- predict(loo_fit2, new_data = slice(geih_clean, i))$.pred
+  loocv_preds_model2[i] <- pred2
+  
   print(paste0("Iteration: ",i))
 }
 
-pred_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
+pred1_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
+pred2_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model2)
 
-loocv_rmse <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
+loocv_rmse1 <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
+loocv_rmse2 <- rmse(loocv_preds_model2, truth = ...1, estimate = ...2)
 
-loocv_rmse
+
 
 
 
