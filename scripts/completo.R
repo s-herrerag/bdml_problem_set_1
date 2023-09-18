@@ -60,6 +60,9 @@ setwd(file_dir)
 #Trayendo la base de datos tras el scrape 
 df <- read.csv("Punto_2/datos.csv")
 df <- df[, -1]
+
+#Limpieza de los datos y creación de variables ------------------------------
+
 summary(df$age)
 #Manteniendo los mayores de 18 
 df <- subset(df, age >= 18 & p6240 ==1) #Muestra de 14.091 obs 
@@ -139,7 +142,6 @@ df <- df %>%
 # Tabla resumen de NaN's --------------------------------------------------
 
 nanTable <- as.data.frame(colSums(is.na(df)))
-print(xtable(nanTable, type = "latex"), file = "outputs/nan_table.tex")
 
 # Estadísticas descriptivas base de datos ---------------------------------
 
@@ -148,8 +150,7 @@ descriptive_statistics <- stargazer(df,
                                     nobs = TRUE, median = TRUE, iqr = FALSE,
                                     digits = 1, align = T,
                                     title = "Summary Statistics",
-                                    covariate.labels = c("Ingreso por Hora", "Edad", "Sexo", "Clase", "Departamento", "Formalidad", "Máximo Nivel Educativo Alcanzado", "Oficio", "Total de Horas Trabajadas"),
-                                    out="outputs/summ_statistics.tex"
+                                    covariate.labels = c("Ingreso por Hora", "Edad", "Sexo", "Clase", "Departamento", "Formalidad", "Máximo Nivel Educativo Alcanzado", "Oficio", "Total de Horas Trabajadas")
 )
 
 # Gráficos ----------------------------------------------------------------
