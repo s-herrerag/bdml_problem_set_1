@@ -5,7 +5,7 @@
 
 #-------------------------------------------
 # Load packages
-pkg <- list("dplyr", "readr", "tidyverse","rio","stargazer", "boot")
+pkg <- list("dplyr", "readr", "tidyverse", "rio", "stargazer", "boot")
 lapply(pkg, require, character.only = T)
 rm(pkg)
 
@@ -14,30 +14,33 @@ rm(list = ls())
 #-------------------------------------------
 
 # Load data ---------------------------------
-data <- read_csv("stores/geih_scraped.csv")
+base <- read_csv("stores/geih_scraped.csv")
+set.seed(123)
 
 # Item a ------------------------------------
-data<- data[!is.na(data$y_ingLab_m_ha),]
-data<- data[!is.na(data$maxEducLevel),]
+base <- base[!is.na(base$y_ingLab_m_ha), ]
+base <- base[!is.na(base$maxEducLevel), ]
 
 # Regresión unconditional wage gap
-data$logwage <- log(data$y_ingLab_m_ha)
-data$female <- ifelse(data$sex == 1, 0, 1)
-reg1 <- lm(logwage ~ female, data = data)
+base$logwage <- log(base$y_ingLab_m_ha)
+base$female <- ifelse(base$sex == 1, 0, 1)
+reg1 <- lm(logwage ~ female, data = base)
 
 # Item b -------------------------------------
+base$age2 <- (base$age)^2
 
-##FWL
-data <- data %>% mutate(femaleResidF = lm(female ~ maxEducLevel + oficio + formal + age + sizeFirm, data)$residuals)
-data <- data %>% mutate(WageResidF=lm(logwage~maxEducLevel + oficio + formal + age + sizeFirm, data)$residuals)
-reg2 <-lm(WageResidF~femaleResidF,data)
+## FWL
+base <- base %>% mutate(femaleResidF = lm(female ~ maxEducLevel + relab + formal + age + age2 + sizeFirm, base)$residuals)
+base <- base %>% mutate(WageResidF = lm(logwage ~ maxEducLevel + relab + formal + age + age2 + sizeFirm, base)$residuals)
+reg2 <- lm(WageResidF ~ femaleResidF, base)
 
-reg3 <- lm(logwage~female+maxEducLevel + oficio + formal + age + sizeFirm, data)
+stargazer(reg1, reg2, type = "latex", digits = 6, covariate.labels = c("Female", "Female Resid"), dep.var.labels = c("Wage", "Wage"), title = "Modelos wage gap", omit = c("Constant"))
 
-stargazer(reg1,reg2,reg3,type="text",digits=7)
+## FWL with boostrap
+fn <- function(data, index) {
+  data <- data %>% mutate(femaleResidF = lm(female ~ maxEducLevel + relab + formal + age + age2 + sizeFirm, data = data)$residuals)
+  data <- data %>% mutate(WageResidF = lm(logwage ~ maxEducLevel + relab + formal + age + age2 + sizeFirm, data = data)$residuals)
+  coef(lm(WageResidF ~ femaleResidF, data = data, subset = index))[2]
+}
 
-##FWL with boostrap
-
-
-
-
+boot(base, fn, R = 1000)

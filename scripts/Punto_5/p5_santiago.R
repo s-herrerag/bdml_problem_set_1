@@ -129,7 +129,51 @@ for (i in seq_len(nrow(geih_clean))) {
   print(paste0("Iteration: ",i))
 }
 
-pred_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
+pred1_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
+pred2_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model2)
+
+loocv_rmse1 <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
+loocv_rmse2 <- rmse(loocv_preds_model2, truth = ...1, estimate = ...2)
+
+#Another possibility is estimating the LOOCV using the leverage statistic:
+
+#Estimate the two models with lm on the entire dataset
+
+#Model 11:
+
+model_11_lm <- glm(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2 + totalHoursWorked:maxEducLevel + oficio:maxEducLevel,
+                  data=geih_clean)
+
+del <- cv.glm(geih_clean, model_11_lm)$delta
+
+leverages_model_11 <- as.data.frame(hatvalues(model_11_lm))
+
+predictions_model_11 <- predict(model_11_lm, geih_clean)
+
+geih_model_11 <- bind_cols(select(geih_clean, logw), predictions_model_11, leverages_model_11) %>%
+  rename(c("pred"="...2", "leverage"="hatvalues(model_11_lm)")) %>%
+  mutate(error = logw-pred) %>%
+  mutate(influence = (error/(1-leverage))^2) %>%
+  mutate(influence = ifelse(influence>100, NA, influence))
+
+mean(geih_model_11$influence, na.rm = T)
+
+lev_test <- broom::augment(model_11_lm)
+
+lev_model11_plt <- ggplot(geih_model_11) +
+  geom_point(aes(x=error, y=hatvalues(model_11_lm)))
+
+loocv_model11 <- 
+
+#Model 12
+
+model_12_lm <- lm()
+rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% 
+  step_dummy(all_factor_predictors())
+rec_ext10 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel + formal:clase) %>% 
+  step_dummy(all_factor_predictors())
 
 loocv_rmse <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
 
