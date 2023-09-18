@@ -7,6 +7,7 @@ library(modeest)
 rm(list = ls())
 file_dir <- this.path::here()
 setwd(file_dir)
+#setwd("/Users/hectorsegura/Documentos/Big Data & ML/Taller 1 ")
 
 #Trayendo la base de datos tras el scrape 
 df <- read.csv("datos.csv")
@@ -66,7 +67,7 @@ HistW <- ggplot(geih_clean) +
   geom_histogram(aes(x=W), color = "black", fill = "grey") +
   scale_y_continuous(breaks = seq(0, 4000, by = 1000)) + 
   scale_x_continuous(breaks = seq(0, 70000, by = 10000), limits = c(NA, 70000)) + 
-  labs(y="Frecuencia", x="log(w)") +
+  labs(y="Frecuencia", x="(w)") +
   theme_classic()
 ggsave("HistW.png", plot = HistW, path = "../../graphics", dpi = 500)  
 
@@ -100,40 +101,3 @@ BoxFemale <- ggplot(geih_clean) +
   labs(y= "log(w)", x="Female") +
   theme_classic()
 ggsave("BoxFemale.png", plot = BoxFemale, path = "../../graphics", dpi = 500)  
-
-
-# Decisiones y pruebas ----------------------------------------------------
-
-salario_horas_ordenado <- sort(salario_horas)
-tail(salario_horas_ordenado) #Sólo hay un valor que se sale mucho de la distribución y es 350583.3 
-
-#Tal vez lo mejor sería quitar este valor atípico para visualizar mejor los datos y estimar con mayor precisión
-
-#conteo de cuantas obs estan por encima!!!!!
-std_nueva <- sd(df$y_ingLab_m_ha) #Nueva varianza 
-write_csv(df, file = "BaseImputada.csv") 
-
-#Seccion 
-#1. Decisiones que hemos tomado (variable de w, ocupados, poner como NA el valor extremo)
-#2. Cuantos obs hay. Valores raros (el grueso de la datos se concentra en un rango y eso hace que haya valores atipicos) ¿Cuantos? Graficos. Resumen por cuartiles  
-#3. Estadisticas descriptivas antes de la imputacion
-#4. NAs por media por el tema de la varianza (discutir por que no por la moda)
-#5. Como se ve la base completa. Estadisticas descriptivas despues de la imputacion
-
-
-#Seleccionar variables. 
-
-primer_cuartil <- quantile(salario_horas, 0.25)
-segundo_cuartil <- quantile(salario_horas, 0.50)
-tercer_cuartil <- quantile(salario_horas, 0.95)
-cuarto_cuartil <- quantile(salario_horas, 0.99, na.rm = TRUE)
-
-
-
-df %>%
-  filter(salario_horas<cuarto_cuartil) %>% 
-  ggplot()+geom_histogram(aes(x= salario_horas))
-
-
-quienes <- df %>%
-  filter(salario_horas>=cuarto_cuartil)
