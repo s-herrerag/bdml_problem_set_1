@@ -5,7 +5,8 @@ library(modeest)
 
 
 rm(list = ls())
-setwd("/Users/hectorsegura/Documentos/Big Data & ML/Taller 1 ")
+file_dir <- this.path::here()
+setwd(file_dir)
 
 #Trayendo la base de datos tras el scrape 
 df <- read.csv("datos.csv")
@@ -39,74 +40,75 @@ df <- df %>%
 std_nueva <- sd(df$y_ingLab_m_ha) #Nueva varianza 8111 
 write_csv(df, file = "BaseFinal.csv") 
 
-salario_horas <- df$y_ingLab_m_ha
-salario_horas_noNA <- na.omit(salario_horas) 
+geih_clean <- read.csv("BaseFinal.csv")
 
-desviacion_estandar_S <- sd(salario_horas_noNA)
-moda <- mfv(salario_horas_noNA)
-media <- mean(salario_horas_noNA)
+geih_clean$female <- NA 
+geih_clean$female <- ifelse(geih_clean$sex == 0, 1,0)
 
-prueba_ocu <- df$ocu - df$p6240
+geih_clean <- geih_clean %>% 
+  mutate(logw=log(y_ingLab_m_ha)) %>%
+  mutate(totalHoursWorked2=totalHoursWorked^2) %>%
+  mutate(age2=age^2) %>%
+  select(y_ingLab_m_ha, logw, age, age2, sex, female, clase, depto, formal, maxEducLevel, oficio, totalHoursWorked, totalHoursWorked2, ocu, p6240)
+
+colnames(geih_clean)[colnames(geih_clean) == "y_ingLab_m_ha"] <- "W"
+
+salario_horas <- geih_clean$W
+
+prueba_ocu <- geih_clean$ocu - geih_clean$p6240
 summary(prueba_ocu) #Todos los que tienen p6240 son ocupados, no hay cosas raras. En cambio, hay personas que son ocupadas
                     #que declaran utilizar su tiempo en cosas diferentes a trabajar... 
 
-salario_horas <- df$y_ingLab_m_ha
 
-df <- df %>% 
-  mutate(logw = log(y_ingLab_m_ha))
+# Gráficos ----------------------------------------------------------------
 
-nueva <- df %>% 
-  filter(salario_horas<cuarto_cuartil) 
+HistW <- ggplot(geih_clean) + 
+  geom_histogram(aes(x=W), color = "black", fill = "grey") +
+  scale_y_continuous(breaks = seq(0, 4000, by = 1000)) + 
+  scale_x_continuous(breaks = seq(0, 70000, by = 10000), limits = c(NA, 70000)) + 
+  labs(y="Frecuencia", x="log(w)") +
+  theme_classic()
+ggsave("HistW.png", plot = HistW, path = "../../graphics", dpi = 500)  
 
-nueva <- nueva %>% 
-  mutate(logw = log(y_ingLab_m_ha))
+DensidadW <- ggplot(geih_clean) + 
+  geom_density(aes(x=W), color = "black", fill = "grey") +
+  scale_x_continuous(breaks = seq(0, 60000, by = 10000), limits = c(NA, 70000)) + 
+  labs(y="Densidad", x="(w)") +
+  theme_classic()
+ggsave("DensidadW.png", plot = DensidadW, path = "../../graphics", dpi = 500) 
 
-desviacion_estandar_filter <- sd(nueva$y_ingLab_m_ha)
-moda <- mfv(nueva$y_ingLab_m_ha)
-media <- mean(salario_horas_noNA)
-  
-#Usar log de w para construir los graficos
-hist(df$logw, 
-     main = "Histograma Salario por horas",  # Título del gráfico
-     xlab = "Valores",                       # Etiqueta del eje x
-     ylab = "Frecuencia",                    # Etiqueta del eje y
-     col = "lightblue",                      # Color de las barras del histograma
-     border = "black")                       # Color del borde de las barras
-     #breaks = 50)                            # Número de intervalos (barras)
+plot(density(salario_horas))
 
-densidad_kernel <- density(salario_horas)
-plot(densidad_kernel)
+hist(geih_clean$age) #El max son 91 años 
 
-boxplot(salario_horas) #Hacer uno por rangos de edad o algo similar 
-hist(df$age) #El max son 91 años 
-
-rangos_edad <- NA
-rangos_edad <- ifelse(nueva$age >=18 & nueva$age <=30, 1, NA)
-rangos_edad <- ifelse(nueva$age > 30 & nueva$age <=50, 2, rangos_edad)
-rangos_edad <- ifelse(nueva$age > 50 & nueva$age <=70, 3, rangos_edad)
-rangos_edad <- ifelse(nueva$age > 70 & nueva$age <=91, 4, rangos_edad)
+geih_clean$rangos_edad <- NA
+geih_clean$rangos_edad <- ifelse(geih_clean$age >=18 & geih_clean$age <=30, 1, NA)
+geih_clean$rangos_edad <- ifelse(geih_clean$age > 30 & geih_clean$age <=50, 2, geih_clean$rangos_edad)
+geih_clean$rangos_edad <- ifelse(geih_clean$age > 50 & geih_clean$age <=70, 3, geih_clean$rangos_edad)
+geih_clean$rangos_edad <- ifelse(geih_clean$age > 70 & geih_clean$age <=91, 4, geih_clean$rangos_edad)
 label_edad <- c("18-30", "31-50", "51-70", "71-91")
-rangos_edad <- factor(rangos_edad, levels = 1:4, labels = label_edad)
+geih_clean$rangos_edad <- factor(geih_clean$rangos_edad, levels = 1:4, labels = label_edad)
 
-par(cex.axis = 0.8) 
-boxplot(nueva$logw ~ rangos_edad,
-        main = "Salario según rangos de edad", 
-        xlab = "Rangos de edad",
-        ylab = "Salario por horas",
-        col = "lightblue",
-        border = "black",
-        yaxt = "n")
+BoxEdad <- ggplot(geih_clean) +
+  geom_boxplot(aes(x=factor(rangos_edad), y=logw), color = "black") +
+  labs(y= "log(w)", x="Rangos de edad") +
+  theme_classic()
+ggsave("BoxEdad.png", plot = BoxEdad, path = "../../graphics", dpi = 500)  
 
-label_y <- c("$5k", "$10k", "$15k", "$20k", "$25k", "$30k")
-axis(2, at = seq(5000, 30000, by = 5000), labels = label_y, las = 1)
+BoxFemale <- ggplot(geih_clean) +
+  geom_boxplot(aes(x=factor(female), y=logw), color = "black") +
+  labs(y= "log(w)", x="Female") +
+  theme_classic()
+ggsave("BoxFemale.png", plot = BoxFemale, path = "../../graphics", dpi = 500)  
+
+
+# Decisiones y pruebas ----------------------------------------------------
 
 salario_horas_ordenado <- sort(salario_horas)
 tail(salario_horas_ordenado) #Sólo hay un valor que se sale mucho de la distribución y es 350583.3 
 
 #Tal vez lo mejor sería quitar este valor atípico para visualizar mejor los datos y estimar con mayor precisión
 
-#Imputación de NAs con la moda 
-df$y_ingLab_m_ha <- ifelse(is.na(df$y_ingLab_m_ha), media, df$y_ingLab_m_ha)
 #conteo de cuantas obs estan por encima!!!!!
 std_nueva <- sd(df$y_ingLab_m_ha) #Nueva varianza 
 write_csv(df, file = "BaseImputada.csv") 
