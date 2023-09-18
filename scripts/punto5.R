@@ -8,7 +8,7 @@ p_load(this.path, tidyverse, tidymodels, boot, stargazer)
 file_dir <- this.path::here()
 setwd(file_dir)
 
-geih_clean <- read.csv("../Punto_2/BaseFinal.csv")
+geih_clean <- read.csv("Punto_2/BaseFinal.csv")
 
 #We also need to verify the factor data
 geih_clean <- geih_clean %>%
@@ -38,7 +38,7 @@ rec_age <- recipe(logw ~ age + age2, data = train)
 rec_gender <- recipe(logw ~ sex, data = train)
 
 rec_ext1 <- recipe(logw ~ age + age2 + sex, data=train)
-rec_ext2 <- recipe(logw ~ age + age2 + sex, data=train) %>%
+rec_ext2 <- recipe(logw ~ age + age2 + sex + formal, data=train) %>%
   step_dummy(all_factor_predictors())
 rec_ext3 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel, data=train) %>%
   step_dummy(all_factor_predictors())
