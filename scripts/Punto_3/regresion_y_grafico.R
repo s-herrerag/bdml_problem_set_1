@@ -12,7 +12,7 @@ setwd(file_dir)
 # Transformación de variables que exige el modelo. ------------------------
 
 df_clean <- read.csv("../../stores/geih_scraped.csv") %>%
-  mutate(logInc = log(y_ingLab_m_ha), age2 = age^2) ## Arreglar variable salario
+  mutate(logw = log(y_ingLab_m_ha), age2 = age^2) ## Arreglar variable salario
 
 df_clean <- df_clean %>%
   mutate(age2 = age^2)
@@ -20,13 +20,13 @@ df_clean <- df_clean %>%
 
 # Regresión ---------------------------------------------------------------
 
-salario.edad.lm <- lm(logInc ~ age + age2, data = df_clean)
-stargazer(salario.edad.lm, type = "")
+salario.edad.lm <- lm(logw ~ age + age2, data = df_clean)
+stargazer(salario.edad.lm, type = "latex")
 
 
 # Gráfico de dispersión de datos con la curva que describe el modelo --------
 
-ggplot(df_clean, aes(y = logInc, x = age)) +
+ggplot(df_clean, aes(y = logw, x = age)) +
   geom_point() +
   stat_smooth(
     formula = "y ~ x + I(x^2)", method = "lm", se = TRUE,
