@@ -125,12 +125,12 @@ summary(prueba_ocu) #Todos los que tienen p6240 son ocupados, no hay cosas raras
 
 # Tablas ------------------------------------------------------------------
 
-# Tabla resumen de NaN's
+# Tabla resumen de NaN's --------------------------------------------------
 
 nanTable <- as.data.frame(colSums(is.na(geih_clean)))
 print(xtable(nanTable, type = "latex"), file = "outputs/nan_table.tex")
 
-# Estadísticas descriptivas base de datos.
+# Estadísticas descriptivas base de datos ---------------------------------
 
 df <- df %>% 
   select("y_ingLab_m_ha", 
