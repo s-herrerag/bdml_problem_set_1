@@ -88,7 +88,6 @@ df <- df %>%
 # Tabla resumen de NaN's --------------------------------------------------
 
 nanTable <- as.data.frame(colSums(is.na(geih_clean)))
-print(xtable(nanTable, type = "latex"), file = "outputs/nan_table.tex")
 
 # Estadísticas descriptivas base de datos ---------------------------------
 
@@ -97,8 +96,7 @@ descriptive_statistics <- stargazer(df,
                                     nobs = TRUE, median = TRUE, iqr = FALSE,
                                     digits = 1, align = T,
                                     title = "Summary Statistics",
-                                    covariate.labels = c("Ingreso por Hora", "Edad", "Sexo", "Clase", "Departamento", "Formalidad", "Máximo Nivel Educativo Alcanzado", "Oficio", "Total de Horas Trabajadas"),
-                                    out="outputs/summ_statistics.tex"
+                                    covariate.labels = c("Ingreso por Hora", "Edad", "Sexo", "Clase", "Departamento", "Formalidad", "Máximo Nivel Educativo Alcanzado", "Oficio", "Total de Horas Trabajadas")
 )
 
 # Gráficos ----------------------------------------------------------------
