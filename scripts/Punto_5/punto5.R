@@ -4,7 +4,7 @@
 
 # Libraries and data ------------------------------------------------------
 require(pacman)
-p_load(this.path, tidyverse, tidymodels)
+p_load(this.path, tidyverse, tidymodels, boot, stargazer)
 file_dir <- this.path::here()
 setwd(file_dir)
 
@@ -16,7 +16,7 @@ geih_clean <- geih_clean %>%
   mutate(logw=log(y_ingLab_m_ha)) %>%
   mutate(totalHoursWorked2=totalHoursWorked^2) %>%
   mutate(age2=age^2) %>%
-  select(c(logw, age, age2, sex, clase, depto, formal, maxEducLevel, oficio, totalHoursWorked, totalHoursWorked2)) %>%
+  select(c(logw, age, age2, sex, depto, formal, maxEducLevel, oficio, totalHoursWorked, totalHoursWorked2)) %>%
   drop_na()
 
 
@@ -32,30 +32,30 @@ test  <- testing(geih_split)
 
 
 # b) Models and alternative specifications------------------------------------------------------------------
-#Vars to add: clase, depto, formal, maxEducLevel, oficio, totalHoursWorked
+#Vars to add: , depto, formal, maxEducLevel, oficio, totalHoursWorked
 
 rec_age <- recipe(logw ~ age + age2, data = train)
 rec_gender <- recipe(logw ~ sex, data = train)
 
 rec_ext1 <- recipe(logw ~ age + age2 + sex, data=train)
-rec_ext2 <- recipe(logw ~ age + age2 + sex + formal, data=train) %>%
+rec_ext2 <- recipe(logw ~ age + age2 + sex, data=train) %>%
   step_dummy(all_factor_predictors())
 rec_ext3 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel, data=train) %>%
   step_dummy(all_factor_predictors())
 rec_ext4 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked, data=train) %>%
   step_dummy(all_factor_predictors())
-rec_ext5 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+rec_ext5 <- recipe(logw ~ age + age2 + sex  + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_dummy(all_factor_predictors())
 rec_ext6 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ sex:maxEducLevel + sex:oficio ) %>%
   step_dummy(all_factor_predictors())
 rec_ext7 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ sex:maxEducLevel + sex:oficio) %>%
+  step_interact(terms = ~ sex:maxEducLevel:+ sex:oficio) %>%
   step_dummy(all_factor_predictors())
-rec_ext8 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+rec_ext8 <- recipe(logw ~ age + age2 + sex +  formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ totalHoursWorked:maxEducLevel) %>%
   step_dummy(all_factor_predictors())
-rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
+rec_ext9 <- recipe(logw ~ age + age2 + sex + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
   step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% 
   step_dummy(all_factor_predictors())
 
@@ -112,10 +112,6 @@ ggsave("HistError.png", plot = Hist_error, path = "../../graphics", dpi = 500)
 summary(list_predictions[[11]]$Error)
 std <- sd(list_predictions[[11]]$Error)
 
-error <- list_predictions[[11]]$Error
-quienes <- list_predictions[[11]] %>% 
-  filter(error > 0)
-
 # d) LOOCV -------------------------------------------------------------------
 
 loocv_preds_model1 <- vector("numeric", length = nrow(geih_clean))
@@ -123,68 +119,45 @@ loocv_preds_model2 <- vector("numeric", length = nrow(geih_clean))
 
 for (i in seq_len(nrow(geih_clean))) {
   loo_data <- geih_clean[-i, ]
-  loo_fit <- list_workflows[[11]] %>% fit(data = loo_data)
-  pred <- predict(loo_fit, new_data = slice(geih_clean, i))$.pred
-  loocv_preds_model1[i] <- pred
+  
+  #Model 1
+  loo_fit1 <- list_workflows[[10]] %>% fit(data = loo_data)
+  pred1 <- predict(loo_fit1, new_data = slice(geih_clean, i))$.pred
+  loocv_preds_model1[i] <- pred1
+  
+  #Model 2
+  loo_fit2 <- list_workflows[[11]] %>% fit(data = loo_data)
+  pred2 <- predict(loo_fit2, new_data = slice(geih_clean, i))$.pred
+  loocv_preds_model2[i] <- pred2
+  
   print(paste0("Iteration: ",i))
 }
 
 pred1_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model1)
 pred2_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model2)
 
-loocv_rmse1 <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
-loocv_rmse2 <- rmse(loocv_preds_model2, truth = ...1, estimate = ...2)
+loocv_rmse1 <- rmse(pred1_dataset_loocv, truth = ...1, estimate = ...2)
+loocv_rmse2 <- rmse(pred2_dataset_loocv, truth = ...1, estimate = ...2)
+
+rmse_loocv_df <- data.frame(modelos = c("Modelo 10", "Modelo 11"), mse= c(loocv_rmse1$.estimate, loocv_rmse2$.estimate))
+colnames(rmse_loocv_df) <- c("", "MSE de LOOCV")
+stargazer(rmse_loocv_df, summary = F, rownames = F,
+          out="outputs/rmse_loocv.tex")
+
 
 #Another possibility is estimating the LOOCV using the leverage statistic:
+#Test: Model 10 
 
-#Estimate the two models with lm on the entire dataset
+model_10_lm <- glm(logw ~ age + age2 + sex  + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2 + totalHoursWorked:maxEducLevel,
+                   data=geih_clean)
 
-#Model 11:
+leverages_model_10 <- as.data.frame(hatvalues(model_10_lm))
+predictions_model_10 <- predict(model_10_lm, geih_clean)
 
-model_11_lm <- glm(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2 + totalHoursWorked:maxEducLevel + oficio:maxEducLevel,
-                  data=geih_clean)
-
-del <- cv.glm(geih_clean, model_11_lm)$delta
-
-leverages_model_11 <- as.data.frame(hatvalues(model_11_lm))
-
-predictions_model_11 <- predict(model_11_lm, geih_clean)
-
-geih_model_11 <- bind_cols(select(geih_clean, logw), predictions_model_11, leverages_model_11) %>%
-  rename(c("pred"="...2", "leverage"="hatvalues(model_11_lm)")) %>%
+geih_model_10 <- bind_cols(select(geih_clean, logw), predictions_model_10, leverages_model_10) %>%
+  rename(c("pred"="...2", "leverage"="hatvalues(model_10_lm)")) %>%
   mutate(error = logw-pred) %>%
   mutate(influence = (error/(1-leverage))^2) %>%
-  mutate(influence = ifelse(influence>100, NA, influence))
+  mutate(influence = ifelse(influence>100, NA, influence)) #The issue is that some obs have leverage =1
 
-mean(geih_model_11$influence, na.rm = T)
-
-lev_test <- broom::augment(model_11_lm)
-
-lev_model11_plt <- ggplot(geih_model_11) +
-  geom_point(aes(x=error, y=hatvalues(model_11_lm)))
-
-loocv_model11 <- 
-
-#Model 12
-
-model_12_lm <- lm()
-rec_ext9 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel) %>% 
-  step_dummy(all_factor_predictors())
-rec_ext10 <- recipe(logw ~ age + age2 + sex + clase + formal + maxEducLevel + oficio + totalHoursWorked + totalHoursWorked2, data=train) %>%
-  step_interact(terms = ~ totalHoursWorked:maxEducLevel + oficio:maxEducLevel + formal:clase) %>% 
-  step_dummy(all_factor_predictors())
-
-loocv_rmse <- rmse(loocv_preds_model1, truth = ...1, estimate = ...2)
-
-loocv_rmse
-
-
-
-
-
-
-
-
-
-
+mean(geih_model_10$influence, na.rm = T)

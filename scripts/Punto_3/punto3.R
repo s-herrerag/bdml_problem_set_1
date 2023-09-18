@@ -22,6 +22,7 @@ df_clean <- df_clean %>%
 
 salario.edad.lm <- lm(logInc ~ age + age2, data = df_clean)
 stargazer(salario.edad.lm, type = "latex",
+          digits=6,
           out="outputs/reg_salario_edad.tex")
 
 
