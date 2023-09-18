@@ -125,13 +125,6 @@ summary(prueba_ocu) #Todos los que tienen p6240 son ocupados, no hay cosas raras
 
 # Tablas ------------------------------------------------------------------
 
-# Tabla resumen de NaN's --------------------------------------------------
-
-nanTable <- as.data.frame(colSums(is.na(geih_clean)))
-print(xtable(nanTable, type = "latex"), file = "outputs/nan_table.tex")
-
-# Estadísticas descriptivas base de datos ---------------------------------
-
 df <- df %>% 
   select("y_ingLab_m_ha", 
          "age", 
@@ -142,6 +135,13 @@ df <- df %>%
          "maxEducLevel", 
          "oficio", 
          "totalHoursWorked")
+
+# Tabla resumen de NaN's --------------------------------------------------
+
+nanTable <- as.data.frame(colSums(is.na(df)))
+print(xtable(nanTable, type = "latex"), file = "outputs/nan_table.tex")
+
+# Estadísticas descriptivas base de datos ---------------------------------
 
 descriptive_statistics <- stargazer(df,
                                     type = "latex", min.max = TRUE, mean.sd = TRUE,
