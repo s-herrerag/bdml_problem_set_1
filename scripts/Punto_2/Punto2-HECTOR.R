@@ -50,7 +50,21 @@ geih_clean <- geih_clean %>%
   mutate(logw=log(y_ingLab_m_ha)) %>%
   mutate(totalHoursWorked2=totalHoursWorked^2) %>%
   mutate(age2=age^2) %>%
-  select(y_ingLab_m_ha, logw, age, age2, sex, female, clase, depto, formal, maxEducLevel, oficio, totalHoursWorked, totalHoursWorked2, ocu, p6240)
+  select(y_ingLab_m_ha, 
+         logw, 
+         age, 
+         age2, 
+         sex, 
+         female, 
+         clase, 
+         depto, 
+         formal, 
+         maxEducLevel, 
+         oficio, 
+         totalHoursWorked, 
+         totalHoursWorked2, 
+         ocu, 
+         p6240)
 
 colnames(geih_clean)[colnames(geih_clean) == "y_ingLab_m_ha"] <- "W"
 
