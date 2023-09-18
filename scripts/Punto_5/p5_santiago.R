@@ -123,7 +123,7 @@ loocv_preds_model2 <- vector("numeric", length = nrow(geih_clean))
 
 for (i in seq_len(nrow(geih_clean))) {
   loo_data <- geih_clean[-i, ]
-  loo_fit <- list_workflows[[2]] %>% fit(data = loo_data)
+  loo_fit <- list_workflows[[11]] %>% fit(data = loo_data)
   pred <- predict(loo_fit, new_data = slice(geih_clean, i))$.pred
   loocv_preds_model1[i] <- pred
   print(paste0("Iteration: ",i))
