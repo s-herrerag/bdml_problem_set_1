@@ -8,7 +8,7 @@ p_load(this.path, tidyverse, tidymodels, boot, stargazer)
 file_dir <- this.path::here()
 setwd(file_dir)
 
-geih_clean <- read.csv("../Punto_2/BaseFinal.csv")
+geih_clean <- read.csv("../stores/BaseFinal.csv")
 
 #We also need to verify the factor data
 geih_clean <- geih_clean %>%
@@ -107,7 +107,7 @@ Hist_error <- ggplot(list_predictions[[11]]) +
   xlab("Error de predicción \n (Diferencia entre salario observado y predicho en pesos)") + 
   theme_classic()
 
-ggsave("HistError.png", plot = Hist_error, path = "../../graphics", dpi = 500)  
+ggsave("HistError.png", plot = Hist_error, path = "../views/graphics", dpi = 500)  
 
 summary(list_predictions[[11]]$Error)
 std <- sd(list_predictions[[11]]$Error)
@@ -142,7 +142,7 @@ loocv_rmse2 <- rmse(pred2_dataset_loocv, truth = ...1, estimate = ...2)
 rmse_loocv_df <- data.frame(modelos = c("Modelo 10", "Modelo 11"), mse= c(loocv_rmse1$.estimate, loocv_rmse2$.estimate))
 colnames(rmse_loocv_df) <- c("", "MSE de LOOCV")
 stargazer(rmse_loocv_df, summary = F, rownames = F,
-          out="outputs/rmse_loocv.tex")
+          out="../views/tables/rmse_loocv.tex")
 
 
 #Another possibility is estimating the LOOCV using the leverage statistic:
