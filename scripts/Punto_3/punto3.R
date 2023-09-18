@@ -12,7 +12,7 @@ setwd(file_dir)
 # Transformación de variables que exige el modelo. ------------------------
 
 df_clean <- read.csv("../Punto_2/BaseFinal.csv") %>%
-  mutate(logInc = log(y_ingLab_m_ha), age2 = age^2) ## Arreglar variable salario
+  mutate(logInc = log(y_ingLab_m_ha), age2 = age^2)
 
 df_clean <- df_clean %>%
   mutate(age2 = age^2)

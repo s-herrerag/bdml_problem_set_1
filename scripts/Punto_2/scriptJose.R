@@ -4,7 +4,7 @@
 # Carga de paquetes y datos necesarios. -----------------------------------
 
 library(pacman)
-p_load(this.path, rvest, tidyverse, stargazer)
+p_load(this.path, rvest, tidyverse, stargazer, xtable)
 file_dir <- this.path::here()
 setwd(file_dir)
 
@@ -34,15 +34,33 @@ write_csv(df, file = "datosTaller1_limpios.csv")
 
 # Otros: ------------------------------------------------------------------
 
+#Selección de las variables de interés
+
+df <- df %>% 
+  select("y_ingLab_m_ha", 
+         "age", 
+         "sex", 
+         "clase", 
+         "depto", 
+         "formal", 
+         "maxEducLevel", 
+         "oficio", 
+         "totalHoursWorked")
+
 # Tabla resumen de NaN's
 
 nanTable <- as.data.frame(colSums(is.na(df)))
+print(xtable(nanTable, type = "latex"), file = "outputs/nan_table.tex")
 
 # Estadísticas descriptivas base de datos.
 
-estadisticas_descriptivas <- stargazer(df,
-  type = "text", min.max = TRUE, mean.sd = TRUE,
+#Hacemos la tabla
+
+descriptive_statistics <- stargazer(df,
+  type = "latex", min.max = TRUE, mean.sd = TRUE,
   nobs = TRUE, median = TRUE, iqr = FALSE,
   digits = 1, align = T,
-  title = "Summary Statistics"
+  title = "Summary Statistics",
+  covariate.labels = c("Ingreso por Hora", "Edad", "Sexo", "Clase", "Departamento", "Formalidad", "Máximo Nivel Educativo Alcanzado", "Oficio", "Total de Horas Trabajadas"),
+  out="outputs/summ_statistics.tex"
 )
