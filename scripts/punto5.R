@@ -8,7 +8,7 @@ p_load(this.path, tidyverse, tidymodels, boot, stargazer)
 file_dir <- this.path::here()
 setwd(file_dir)
 
-geih_clean <- read.csv("Punto_2/BaseFinal.csv")
+geih_clean <- read.csv("../stores/BaseFinal.csv")
 
 #We also need to verify the factor data
 geih_clean <- geih_clean %>%
@@ -139,10 +139,10 @@ pred2_dataset_loocv <-bind_cols(geih_clean$logw, loocv_preds_model2)
 loocv_rmse1 <- rmse(pred1_dataset_loocv, truth = ...1, estimate = ...2)
 loocv_rmse2 <- rmse(pred2_dataset_loocv, truth = ...1, estimate = ...2)
 
-rmse_loocv_df <- data.frame(modelos = c("Modelo 10", "Modelo 11"), mse= c(loocv_rmse1$.estimate, loocv_rmse2$.estimate))
+rmse_loocv_df <- data.frame(modelos = c("Estimacion 8", "Estimacion 9"), mse= c(loocv_rmse1$.estimate, loocv_rmse2$.estimate))
 colnames(rmse_loocv_df) <- c("", "MSE de LOOCV")
 stargazer(rmse_loocv_df, summary = F, rownames = F,
-          out="outputs/rmse_loocv.tex")
+          out="../views/tables/rmse_loocv.tex")
 
 
 #Another possibility is estimating the LOOCV using the leverage statistic:
